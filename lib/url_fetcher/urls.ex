@@ -12,7 +12,7 @@ defmodule URLFetcher.URLs do
   @spec fetch_url(String.t()) :: {:ok, fetched_url} | {:error, any}
   def fetch_url(url) do
     with {:ok, response} <- Tesla.get(url),
-         {:ok, document} = Floki.parse_document(response.body) do
+         {:ok, document} <- Floki.parse_document(response.body) do
       links =
         document
         |> Floki.find("a")
