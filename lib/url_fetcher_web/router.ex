@@ -7,6 +7,8 @@ defmodule URLFetcherWeb.Router do
 
   scope "/api", URLFetcherWeb do
     pipe_through :api
+
+    get "/fetch", URLController, :show, param: "url"
   end
 
   # Enables LiveDashboard only for development
