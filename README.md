@@ -1,18 +1,25 @@
 # URLFetcher
 
-To start your Phoenix server:
+Requirements:
 
-  * Install dependencies with `mix deps.get`
+To run the application in the correct version of Elixir and Phoenix, you need to have [`Docker`](https://docs.docker.com/get-started/) and [`Visual Studio Code`](https://code.visualstudio.com/docs/) installed locally.
+
+### Preparing the environment:
+
+  * With Visual Studio Code open, install the extension [`Remote - Containers`](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) from the marketplace ( <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd>).
+  * Reopen the project inside the Dev Container by typing <kbd>Ctrl/Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> and selecting `Remote-Containers: Reopen in Container`
+
+### Starting the application:
+
+  * The Dev Container should itself perform the installation of all dependencies, if that doesn't happen correctly, just run `mix deps.get`
   * Start Phoenix endpoint with `mix phx.server`
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+### Using the application:
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+The application will be available at [`localhost:4000`](http://localhost:4000).
 
-## Learn more
+It is now possible to fetch web pages in the browser from [`localhost:4000/api/fetch/?url=https://example.com`](http://localhost:4000/api/fetch/?url=https://example.com) or from command line tools such as cURL by running:
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+```bash
+curl --location --request GET 'http://localhost:4000/api/fetch/?url=https://example.com'
+```
