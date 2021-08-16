@@ -17,13 +17,15 @@ defmodule URLFetcher.URLs do
         document
         |> Floki.find("a")
         |> Floki.attribute("href")
-        |> Enum.reject(&invalid_url?/1)
+        |> Enum.reject(&(not valid_url?(&1)))
+        |> Enum.uniq()
         |> Enum.map(&build_absolute_url(&1, response.url))
 
       assets =
         document
         |> Floki.find("img")
         |> Floki.attribute("src")
+        |> Enum.uniq()
         |> Enum.map(&build_absolute_url(&1, response.url))
 
       {:ok, %{base: response.url, links: links, assets: assets}}
@@ -32,13 +34,9 @@ defmodule URLFetcher.URLs do
     end
   end
 
-  defp invalid_url?(url) do
-    case URI.parse(url) do
-      %{scheme: nil} -> true
-      %{host: nil} -> true
-      %{path: nil} -> true
-      _uri -> false
-    end
+  defp valid_url?(url) do
+    uri = URI.parse(url)
+    uri.scheme != nil && uri.host != nil && uri.host =~ "."
   end
 
   defp build_absolute_url(url, base) do

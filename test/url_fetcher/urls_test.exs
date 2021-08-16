@@ -1,66 +1,58 @@
 defmodule URLFetcher.URLSTest do
-  use URLFetcher.DataCase
+  use ExUnit.Case
+
+  import Tesla.Mock
 
   alias URLFetcher.URLs
 
+  setup do
+    mock(fn
+      %{url: "https://placeholder.com"} ->
+        %Tesla.Env{
+          url: "https://placeholder.com",
+          status: 200,
+          body: """
+          <html>
+
+          <head>
+            <title>Mock Page</title>
+          </head>
+
+          <body>
+            <a href="https://placeholder.com">
+              <img src="https://via.placeholder.com/150">
+            </a>
+          </body>
+
+          </html>
+          """
+        }
+
+      %{url: "https://jsonplaceholder.typicode.com/todos/1"} ->
+        json(%{userId: 1, id: 1, title: "delectus aut autem", completed: false})
+
+      %{url: "http://test.test"} ->
+        {:error, :econnrefused}
+    end)
+
+    :ok
+  end
+
   describe "urls" do
-    alias URLFetcher.URLs.URL
-
-    @valid_attrs %{assets: [], links: []}
-    @update_attrs %{assets: [], links: []}
-    @invalid_attrs %{assets: nil, links: nil}
-
-    def url_fixture(attrs \\ %{}) do
-      {:ok, url} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> URLs.create_url()
-
-      url
+    test "fetch_url/1 with a valid page URL fetch URLs" do
+      assert {:ok, url} = URLs.fetch_url("https://placeholder.com")
+      assert url.assets == ["https://via.placeholder.com/150"]
+      assert url.links == ["https://placeholder.com"]
     end
 
-    test "list_urls/0 returns all urls" do
-      url = url_fixture()
-      assert URLs.list_urls() == [url]
-    end
-
-    test "get_url!/1 returns the url with given id" do
-      url = url_fixture()
-      assert URLs.get_url!(url.id) == url
-    end
-
-    test "create_url/1 with valid data creates a url" do
-      assert {:ok, %URL{} = url} = URLs.create_url(@valid_attrs)
+    test "fetch_url/1 with a valid non-page URL returns empty results" do
+      assert {:ok, url} = URLs.fetch_url("https://jsonplaceholder.typicode.com/todos/1")
       assert url.assets == []
       assert url.links == []
     end
 
-    test "create_url/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = URLs.create_url(@invalid_attrs)
-    end
-
-    test "update_url/2 with valid data updates the url" do
-      url = url_fixture()
-      assert {:ok, %URL{} = url} = URLs.update_url(url, @update_attrs)
-      assert url.assets == []
-      assert url.links == []
-    end
-
-    test "update_url/2 with invalid data returns error changeset" do
-      url = url_fixture()
-      assert {:error, %Ecto.Changeset{}} = URLs.update_url(url, @invalid_attrs)
-      assert url == URLs.get_url!(url.id)
-    end
-
-    test "delete_url/1 deletes the url" do
-      url = url_fixture()
-      assert {:ok, %URL{}} = URLs.delete_url(url)
-      assert_raise Ecto.NoResultsError, fn -> URLs.get_url!(url.id) end
-    end
-
-    test "change_url/1 returns a url changeset" do
-      url = url_fixture()
-      assert %Ecto.Changeset{} = URLs.change_url(url)
+    test "fetch_url/1 with unknown domain returns an error" do
+      assert {:error, :econnrefused} = URLs.fetch_url("http://test.test")
     end
   end
 end
